@@ -132,7 +132,7 @@ export default function Interview() {
         {/* The Interaction Orb */}
         <div className="relative group cursor-pointer" onClick={toggleCall} role="button" tabIndex={0}>
           {/* Outer glow rings */}
-          <div className={`absolute inset-0 rounded-full blur-[60px] transition-all duration-500
+          <div className={`absolute inset-0 rounded-full blur-[60px] transition-all duration-[1500ms] ease-in-out
             ${isCallActive 
               ? (isAgentSpeaking ? 'bg-fuchsia-600/40 scale-150' : 'bg-blue-600/30 scale-125') 
               : 'bg-purple-600/20 scale-100 group-hover:bg-purple-600/30 group-hover:scale-110'
@@ -140,8 +140,7 @@ export default function Interview() {
           />
           
           {/* Main Orb */}
-          <div className={`w-64 h-64 md:w-80 md:h-80 rounded-full flex items-center justify-center relative overflow-hidden transition-all duration-300
-            orb
+          <div className={`w-64 h-64 md:w-80 md:h-80 rounded-full flex items-center justify-center relative overflow-hidden orb
             ${!isCallActive ? 'orb-idle' : ''}
             ${isCallActive && !isAgentSpeaking ? 'orb-active-listening' : ''}
             ${isCallActive && isAgentSpeaking ? 'orb-speaking' : ''}
