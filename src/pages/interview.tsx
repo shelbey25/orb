@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/router';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { RetellWebClient } from 'retell-client-js-sdk';
 
 const retellClient = new RetellWebClient();
@@ -11,6 +11,30 @@ export default function Interview() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isCallActive, setIsCallActive] = useState(false);
+  const [isAgentSpeaking, setIsAgentSpeaking] = useState(false);
+
+  useEffect(() => {
+    if (!isCallActive) return;
+
+    // Listen for agent speaking state
+    const handleAgentStartSpeaking = () => {
+      console.log('Agent started speaking');
+      setIsAgentSpeaking(true);
+    };
+
+    const handleAgentStopSpeaking = () => {
+      console.log('Agent stopped speaking');
+      setIsAgentSpeaking(false);
+    };
+
+    retellClient.on('agent_start_talking', handleAgentStartSpeaking);
+    retellClient.on('agent_stop_talking', handleAgentStopSpeaking);
+
+    return () => {
+      retellClient.off('agent_start_talking', handleAgentStartSpeaking);
+      retellClient.off('agent_stop_talking', handleAgentStopSpeaking);
+    };
+  }, [isCallActive]);
 
   const handleStartInterview = async () => {
     setIsLoading(true);
@@ -84,6 +108,42 @@ export default function Interview() {
               <span className="text-lg font-medium text-green-400">
                 Connected
               </span>
+            </div>
+
+            {/* Agent Speaking Indicator */}
+            <div className="mt-4 flex flex-col items-center gap-2">
+              <div className="text-sm font-medium text-gray-400">
+                AI Agent Status
+              </div>
+              <div className="flex items-center gap-3 px-6 py-3 rounded-full border-2" style={{
+                borderColor: isAgentSpeaking ? '#ef4444' : '#22c55e',
+                backgroundColor: isAgentSpeaking ? 'rgba(239, 68, 68, 0.1)' : 'rgba(34, 197, 94, 0.1)',
+              }}>
+                <div className="relative">
+                  <div 
+                    className="w-5 h-5 rounded-full animate-pulse"
+                    style={{
+                      backgroundColor: isAgentSpeaking ? '#ef4444' : '#22c55e',
+                    }}
+                  />
+                  {isAgentSpeaking && (
+                    <div 
+                      className="absolute inset-0 w-5 h-5 rounded-full animate-ping opacity-75"
+                      style={{
+                        backgroundColor: '#ef4444',
+                      }}
+                    />
+                  )}
+                </div>
+                <span 
+                  className="text-lg font-semibold"
+                  style={{
+                    color: isAgentSpeaking ? '#ef4444' : '#22c55e',
+                  }}
+                >
+                  {isAgentSpeaking ? 'Speaking' : 'Listening'}
+                </span>
+              </div>
             </div>
           </div>
 
