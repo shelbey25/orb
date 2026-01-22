@@ -12,7 +12,7 @@ export default function Interview() {
   const [error, setError] = useState<string | null>(null);
   const [isCallActive, setIsCallActive] = useState(false);
   const [isAgentSpeaking, setIsAgentSpeaking] = useState(false);
-  const [agentTranscript, setAgentTranscript] = useState('');
+  const [agentTranscript, setAgentTranscript] = useState<string>('');
   const [showDevMenu, setShowDevMenu] = useState(false);
 
   useEffect(() => {
@@ -29,21 +29,46 @@ export default function Interview() {
       setIsAgentSpeaking(false);
     };
 
+    const characterCounter = (text: string) => {
+      return text.length;
+    }
+
     // Listen for agent message updates
     const handleAgentMessage = (message: any) => {
       console.log('Agent message:', message);
-      
+
       // Extract agent message from transcript array
       if (message.transcript && Array.isArray(message.transcript)) {
-        // Find the most recent agent message
-        const agentMessages = message.transcript
+        // Find all agent messages
+        const newAgentText = message.transcript
           .filter((msg: any) => msg.role === 'agent')
           .map((msg: any) => msg.content)
           .join('');
         
-        console.log('Extracted agent text:', agentMessages);
-        setAgentTranscript(agentMessages);
+        console.log('Extracted agent text:', newAgentText);
+
+    setAgentTranscript((prevAgentTranscript) => {
+        console.log('Current agent transcript:', prevAgentTranscript);
+        const theoretical = newAgentText.slice(newAgentText.indexOf(prevAgentTranscript));
+
+        if ((prevAgentTranscript.length === 0 || prevAgentTranscript === "Hello! I'm ready to chat. Click me to end the call.")) {
+          return newAgentText;
+        } else if (characterCounter(theoretical) > 80) {
+          console.log("HIT 2")
+          const index = newAgentText.indexOf(prevAgentTranscript)+prevAgentTranscript.length;
+          console.log(index);
+          return newAgentText.slice(index);
+        } else if (characterCounter(prevAgentTranscript) > 80) {
+          return prevAgentTranscript;
+        } else {
+          const index = newAgentText.indexOf(prevAgentTranscript);
+          return newAgentText.slice(index);
+        }
+      });
+
+
       }
+      
     };
 
     retellClient.on('agent_start_talking', handleAgentStartSpeaking);
@@ -93,7 +118,7 @@ export default function Interview() {
 
       console.log('Call started successfully:', call);
       setIsCallActive(true);
-      setAgentTranscript("Hello! I'm ready to chat. Click me to end the call.");
+      //setAgentTranscript("Hello! I'm ready to chat. Click me to end the call.");
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'An error occurred';
       setError(errorMessage);
