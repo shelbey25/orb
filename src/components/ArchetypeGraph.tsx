@@ -86,18 +86,16 @@ export default function ArchetypeGraph({ className }: ArchetypeGraphProps) {
 
     const graphTimer = setTimeout(() => {
         let startTime: number | null = null;
-        const duration = 2000;
+        // Total duration for the whole staggered sequence
+        const duration = 2500;
         
-        const easeOutQuint = (x: number): number => {
-            return 1 - Math.pow(1 - x, 5);
-        };
-
         const step = (timestamp: number) => {
             if (!startTime) startTime = timestamp;
             const progress = timestamp - startTime;
             const pct = Math.min(progress / duration, 1);
             
-            setGraphProgress(easeOutQuint(pct));
+            // Just store linear progress
+            setGraphProgress(pct);
             
             if (progress < duration) {
                 window.requestAnimationFrame(step);
@@ -119,17 +117,36 @@ export default function ArchetypeGraph({ className }: ArchetypeGraphProps) {
   const radius = 120; // Internal coordinate system radius
   const center = 150; // Internal coordinate system center
   const totalPoints = 8;
+  
+  // Helper to calculate individual point progress
+  const getPointScale = (index: number) => {
+    // These constants should align with the total duration in useEffect
+    const totalDuration = 2500;
+    const stagger = 150; // Delay between each point
+    const pointDuration = 1000; // Duration for one point to fully expand
+    
+    // Scale graphProgress (0-1) back to milliseconds (approximate for render)
+    const currentTime = graphProgress * totalDuration;
+    
+    const start = index * stagger;
+    const p = Math.min(Math.max((currentTime - start) / pointDuration, 0), 1);
+    
+    // Use the smooth easing
+    const easeOutQuint = (x: number): number => 1 - Math.pow(1 - x, 5);
+    return easeOutQuint(p);
+  };
 
   // Calculate polygon points with animation progress
   const points = selectedArchetypes.map((_, i) => {
     const angle = (i * (360 / totalPoints) - 90) * (Math.PI / 180);
     const score = dummyScores[i];
-    // Scale r by graphProgress
-    const r = (score / 100) * radius * graphProgress;
+    // Scale r by individual point scale
+    const r = (score / 100) * radius * getPointScale(i);
     const x = center + r * Math.cos(angle);
     const y = center + r * Math.sin(angle);
     return `${x},${y}`;
   }).join(' ');
+
 
   return (
     <div className={`relative flex items-center justify-center w-full h-full mx-auto select-none ${className}`}>
@@ -220,19 +237,20 @@ export default function ArchetypeGraph({ className }: ArchetypeGraphProps) {
              {selectedArchetypes.map((_, i) => {
                 const angle = (i * (360 / totalPoints) - 90) * (Math.PI / 180);
                 const score = dummyScores[i];
-                // Use graphProgress here too
-                const r = (score / 100) * radius * graphProgress; 
+                // Use individual point scale here too
+                const scale = getPointScale(i);
+                const r = (score / 100) * radius * scale; 
                 const x = center + r * Math.cos(angle);
                 const y = center + r * Math.sin(angle);
                 
                 return (
                     <circle 
                         key={i}
-                        cx={x} cy={y} r={graphProgress > 0.1 ? 3 : 0} 
+                        cx={x} cy={y} r={scale > 0.1 ? 3 : 0} 
                         fill={colors[i]} 
                         className="animate-pulse"
                         style={{
-                            opacity: graphProgress > 0.01 ? 1 : 0,
+                            opacity: scale > 0.01 ? 1 : 0,
                         }}
                     />
                 );
