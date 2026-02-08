@@ -216,7 +216,7 @@ export default function Interview() {
                 {agentTranscript && (
                     <div className="text-center max-w-2xl mx-auto p-6 md:p-8 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-md shadow-2xl">
                         <p className="text-lg md:text-xl text-gray-200 font-light leading-relaxed">
-                            "{agentTranscript}"
+                            {"\"" + agentTranscript + "\""}
                         </p>
                     </div>
                 )}

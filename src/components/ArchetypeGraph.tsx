@@ -153,7 +153,7 @@ export default function ArchetypeGraph({ className }: ArchetypeGraphProps) {
     const angle = (i * (360 / totalPoints) - 90) * (Math.PI / 180);
     const score = dummyScores[i];
     // Scale r by individual point scale
-    const r = (score / 100) * radius * getPointScale(i);
+    const r = ((score ? score : 0) / 100) * radius * getPointScale(i);
     const x = center + r * Math.cos(angle);
     const y = center + r * Math.sin(angle);
     return `${x},${y}`;
@@ -251,7 +251,7 @@ export default function ArchetypeGraph({ className }: ArchetypeGraphProps) {
                 const score = dummyScores[i];
                 // Use individual point scale here too
                 const scale = getPointScale(i);
-                const r = (score / 100) * radius * scale; 
+                const r = ((score ? score : 0) / 100) * radius * scale; 
                 const x = center + r * Math.cos(angle);
                 const y = center + r * Math.sin(angle);
                 
@@ -337,7 +337,7 @@ export default function ArchetypeGraph({ className }: ArchetypeGraphProps) {
                     {selectedArchetypes[hoveredIndex]}
                 </h3>
                 <p className="text-sm text-gray-200 leading-relaxed">
-                    {studentArchetypes[selectedArchetypes[hoveredIndex]]}
+                    {hoveredIndex && selectedArchetypes[hoveredIndex] ? studentArchetypes[selectedArchetypes[hoveredIndex]] : ""}
                 </p>
             </div>
         ) : null}
